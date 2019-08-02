@@ -1,5 +1,6 @@
 package io.cloudbeat.testng;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -8,10 +9,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -28,7 +26,7 @@ public class Plugin implements ITestListener {
     private int currentCaseIndex = 0;
     private ResultModel.Case currentCase;
     private ResultModel.SuiteIteration currentSuiteIteration;
-    private String SUCCESS_FILE_NAME = ".CB_DONE";
+    private final static String TEST_RESULTS_FILENAME = ".CB_TEST_RESULTS";
     private boolean isPluginDisabled;
 
     @Override
@@ -172,14 +170,21 @@ public class Plugin implements ITestListener {
         long duration = (iTestContext.getEndDate().getTime() - iTestContext.getStartDate().getTime()) / 1000;
         result.duration = duration;
 
-        if (report(testMonitorResultUrl, result)) {
-            File success = new File(SUCCESS_FILE_NAME);
-            logInfo("Result report has been sent");
-            try {
-                success.createNewFile();
-            } catch (Exception e) {
-                logError("Error on success file creation", e);
-            }
+        ObjectMapper mapper = new ObjectMapper();
+        String resultJson;
+        try {
+            resultJson = mapper.writeValueAsString(result);
+        } catch (JsonProcessingException e) {
+            logError("Failed to serialize results.", e);
+            return;
+        }
+
+        try {
+            PrintWriter writer = new PrintWriter(TEST_RESULTS_FILENAME, "UTF-8");
+            writer.write(resultJson);
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            logError("Failed to create " + TEST_RESULTS_FILENAME, e);
         }
     }
 

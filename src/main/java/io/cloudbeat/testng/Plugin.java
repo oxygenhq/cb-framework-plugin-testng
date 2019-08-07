@@ -2,6 +2,7 @@ package io.cloudbeat.testng;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Stopwatch;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -18,10 +19,11 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Plugin implements ITestListener {
+    private Stopwatch testTimer;
+    private Stopwatch suiteTimer;
     private PayloadModel payload;
     private ResultModel result;
     private String testMonitorStatusUrl;
-    private String testMonitorResultUrl;
     private String testMonitorToken;
     private int currentCaseIndex = 0;
     private ResultModel.Case currentCase;
@@ -34,6 +36,8 @@ public class Plugin implements ITestListener {
         if(isPluginDisabled) {
             return;
         }
+
+        testTimer = Stopwatch.createStarted();
 
         String testCaseName = iTestResult.getName();
 
@@ -62,8 +66,8 @@ public class Plugin implements ITestListener {
         step.isSuccess = true;
         step.name = testName;
 
-        long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
-        step.duration = duration;
+        testTimer.stop();
+        step.duration = testTimer.elapsed().getNano();
 
         ResultModel.CaseIteration caseIteration = new ResultModel.CaseIteration();
         caseIteration.iterationNum = currentCaseIndex;
@@ -116,7 +120,6 @@ public class Plugin implements ITestListener {
 
         if (payloadpath != null && testmonitorUrl != null && testMonitorToken != null) {
             testMonitorStatusUrl = testmonitorUrl + "/status";
-            testMonitorResultUrl = testmonitorUrl + "/result";
 
             try {
                 payload = PayloadModel.Load(payloadpath);
@@ -132,18 +135,8 @@ public class Plugin implements ITestListener {
                 currentSuiteIteration = new ResultModel.SuiteIteration();
                 currentSuiteIteration.cases = new ArrayList();
 
-                if (result.capabilities.containsKey("browserName")) {
-                    // remove "technology" prefix from the browserName. old CB version uses technology.browser as browserName
-                    // FIXME: this should be removed once CB backend is adapted to send only the browser name without technology prefix.
-                    String browserName = result.capabilities.get("browserName");
-                    int browserNameIdx = browserName.indexOf('.');
-                    if (browserNameIdx > 0)
-                        browserName = browserName.substring(browserNameIdx + 1);
-                    System.setProperty("browserName", browserName);
-                    isPluginDisabled = false;
-                } else {
-                    logError("Plugin will be disabled. browserName is not specified in capabilities.");
-                }
+                suiteTimer = Stopwatch.createStarted();
+                isPluginDisabled = false;
             } catch (Exception e) {
                 logError("Plugin will be disabled. Unable to read/deserialize payload file.", e);
             }
@@ -158,16 +151,21 @@ public class Plugin implements ITestListener {
             return;
         }
 
-        currentSuiteIteration.isSuccess = true;
+        boolean isSuccess = iTestContext.getFailedTests().size() == 0
+                && iTestContext.getFailedButWithinSuccessPercentageTests().size() == 0
+                && iTestContext.getPassedTests().size() > 0;
+
+        currentSuiteIteration.isSuccess = isSuccess;
         result.iterations.add(currentSuiteIteration);
         result.endTime = new Date();
-        result.isSuccess = true;
+        result.isSuccess = isSuccess;
         result.iterationsTotal = 1;
-        result.iterationsFailed = 0;
+        result.iterationsFailed = isSuccess ? 0 : 1;
         result.iterationsWarning = 0;
-        result.iterationsPassed = 1;
+        result.iterationsPassed = isSuccess ? 1 : 0;
 
-        long duration = (iTestContext.getEndDate().getTime() - iTestContext.getStartDate().getTime()) / 1000;
+        suiteTimer.stop();
+        long duration = suiteTimer.elapsed().getSeconds();
         result.duration = duration;
 
         ObjectMapper mapper = new ObjectMapper();

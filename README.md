@@ -1,4 +1,4 @@
-## CloudBeat plugin for Cucumber-Java
+## CloudBeat plugin for TestNG-Java
 
 ### Intro
 This plugin allows executing Java based TestNG tests using the CloudBeat platform.

@@ -67,7 +67,7 @@ public class Plugin implements ITestListener {
         step.name = testName;
 
         testTimer.stop();
-        step.duration = testTimer.elapsed().getNano();
+        step.duration = testTimer.elapsed().toMillis();
 
         ResultModel.CaseIteration caseIteration = new ResultModel.CaseIteration();
         caseIteration.iterationNum = currentCaseIndex;

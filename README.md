@@ -37,8 +37,6 @@ This can be achieved in a two different ways. Please note that all 2 options are
 
 #### Providing WebDriver instance
 ```java
-@RunWith(Cucumber.class)
-@CucumberOptions(plugin = {"pretty", "io.cloudbeat.cucumber.Plugin:"})
 public class RunCucumberTest extends CucumberRunner {
     @BeforeClass
     public static void setUp() {
@@ -50,8 +48,6 @@ public class RunCucumberTest extends CucumberRunner {
 
 #### Providing WebDriver getter method
 ```java
-@RunWith(Cucumber.class)
-@CucumberOptions(plugin = {"pretty", "io.cloudbeat.cucumber.Plugin:"})
 public class RunCucumberTest extends CucumberRunner {
     @BeforeClass
     public static void setUp() {

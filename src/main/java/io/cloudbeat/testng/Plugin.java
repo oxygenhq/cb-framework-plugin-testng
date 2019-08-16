@@ -31,6 +31,52 @@ public class Plugin implements ITestListener {
     private final static String TEST_RESULTS_FILENAME = ".CB_TEST_RESULTS";
     private boolean isPluginDisabled;
 
+    public Plugin() {
+        isPluginDisabled = true;
+        String payloadpath = System.getProperty("payloadpath");;
+        String testmonitorUrl = System.getProperty("testmonitorurl");
+        testMonitorToken = System.getProperty("testmonitortoken");
+
+        if (payloadpath != null && testmonitorUrl != null && testMonitorToken != null) {
+            testMonitorStatusUrl = testmonitorUrl + "/status";
+
+            try {
+                payload = PayloadModel.Load(payloadpath);
+                result = new ResultModel();
+                result.runId = payload.runId;
+                result.instanceId = payload.instanceId;
+                result.capabilities = payload.capabilities;
+                result.metadata = payload.metadata;
+                result.environmentVariables = payload.environmentVariables;
+                result.iterations = new ArrayList();
+                result.startTime = new Date();
+
+                currentSuiteIteration = new ResultModel.SuiteIteration();
+                currentSuiteIteration.cases = new ArrayList();
+
+                suiteTimer = Stopwatch.createStarted();
+
+                if (result.capabilities.containsKey("browserName")) {
+                    // remove "technology" prefix from the browserName. old CB version uses technology.browser as browserName
+                    // FIXME: this should be removed once CB backend is adapted to send only the browser name without technology prefix.
+                    String browserName = result.capabilities.get("browserName");
+                    int browserNameIdx = browserName.indexOf('.');
+                    if (browserNameIdx > 0)
+                        browserName = browserName.substring(browserNameIdx + 1);
+                    System.setProperty("browserName", browserName);
+                    isPluginDisabled = false;
+                    return;
+                }
+
+                logError("Plugin will be disabled. browserName is not specified in capabilities.");
+            } catch (Exception e) {
+                logError("Plugin will be disabled. Unable to read/deserialize payload file.", e);
+            }
+        } else {
+            logInfo("Plugin will be disabled. One of payloadpath, testmonitorurl, or testmonitortoken parameters is missing.");
+        }
+    }
+
     @Override
     public void onTestStart(ITestResult iTestResult) {
         if(isPluginDisabled) {
@@ -113,36 +159,7 @@ public class Plugin implements ITestListener {
 
     @Override
     public void onStart(ITestContext iTestContext) {
-        isPluginDisabled = true;
-        String payloadpath = System.getProperty("payloadpath");;
-        String testmonitorUrl = System.getProperty("testmonitorurl");
-        testMonitorToken = System.getProperty("testmonitortoken");
 
-        if (payloadpath != null && testmonitorUrl != null && testMonitorToken != null) {
-            testMonitorStatusUrl = testmonitorUrl + "/status";
-
-            try {
-                payload = PayloadModel.Load(payloadpath);
-                result = new ResultModel();
-                result.runId = payload.runId;
-                result.instanceId = payload.instanceId;
-                result.capabilities = payload.capabilities;
-                result.metadata = payload.metadata;
-                result.environmentVariables = payload.environmentVariables;
-                result.iterations = new ArrayList();
-                result.startTime = new Date();
-
-                currentSuiteIteration = new ResultModel.SuiteIteration();
-                currentSuiteIteration.cases = new ArrayList();
-
-                suiteTimer = Stopwatch.createStarted();
-                isPluginDisabled = false;
-            } catch (Exception e) {
-                logError("Plugin will be disabled. Unable to read/deserialize payload file.", e);
-            }
-        } else {
-            logInfo("Plugin will be disabled. One of payloadpath, testmonitorurl, or testmonitortoken parameters is missing.");
-        }
     }
 
     @Override

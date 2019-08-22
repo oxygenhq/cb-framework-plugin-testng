@@ -181,6 +181,10 @@ public class Plugin implements ITestListener {
         result.iterationsWarning = 0;
         result.iterationsPassed = isSuccess ? 1 : 0;
 
+        if(!isSuccess && result.failure == null) {
+            result.failure = "No cases found";
+        }
+
         suiteTimer.stop();
         long duration = suiteTimer.elapsed().getSeconds();
         result.duration = duration;
@@ -209,6 +213,9 @@ public class Plugin implements ITestListener {
         ResultModel.Step step = new ResultModel.Step();
         step.isSuccess = false;
         step.screenshot = takeWebDriverScreenshot();
+        String failureReason = iTestResult.getThrowable().getLocalizedMessage();
+        step.failure = failureReason;
+        result.failure = failureReason;
 
         long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
         step.duration = duration;

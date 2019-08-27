@@ -37,7 +37,7 @@ This can be achieved in a two different ways. Please note that all 2 options are
 
 #### Providing WebDriver instance
 ```java
-public class RunCucumberTest extends TestNGRunner {
+public class SeleniumTest extends TestNGRunner {
     @BeforeClass
     public static void setUp() {
         WebDriver driver = ... // WebDriver initialization
@@ -48,7 +48,7 @@ public class RunCucumberTest extends TestNGRunner {
 
 #### Providing WebDriver getter method
 ```java
-public class RunCucumberTest extends TestNGRunner {
+public class SeleniumTest extends TestNGRunner {
     @BeforeClass
     public static void setUp() {
        WebDriverProvider provider = new WebDriverProvider();

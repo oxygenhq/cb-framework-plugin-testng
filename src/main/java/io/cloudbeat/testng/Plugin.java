@@ -213,10 +213,20 @@ public class Plugin implements ITestListener {
         ResultModel.Step step = new ResultModel.Step();
         step.isSuccess = false;
         step.screenshot = takeWebDriverScreenshot();
-        String failureReason = iTestResult.getThrowable().getLocalizedMessage();
-        step.failure = failureReason;
-        result.failure = failureReason;
+        step.name = testName;
+        FailureModel failureModel = new FailureModel();
+        failureModel.type = "TESTNG_ERROR";
+        failureModel.message = iTestResult.getThrowable().getMessage();
+        failureModel.isFatal = true;
 
+        String failureReason = "";
+        try {
+            failureReason = new ObjectMapper().writeValueAsString(failureModel);
+        } catch (JsonProcessingException e) {
+            logError("Cannot serialize failure details");
+        }
+
+        step.failure = failureReason;
         long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
         step.duration = duration;
 
@@ -225,17 +235,22 @@ public class Plugin implements ITestListener {
         caseIteration.isSuccess = false;
         caseIteration.steps = new ArrayList();
         caseIteration.steps.add(step);
+        caseIteration.failure = failureReason;
 
+        result.failure = failureReason;
         if (currentCase.iterations != null) {
             currentCase.iterations.add(caseIteration);
         }
 
+        currentCase.name = testName;
         currentCase.isSuccess = false;
         currentSuiteIteration.cases.add(currentCase);
 
         StatusModel status = createBaseStatusModel(testName);
         status.caze.iterationsFailed = 1;
         status.caze.iterationsPassed = 0;
+        status.caze.failures = new ArrayList<>();
+        status.caze.failures.add(failureModel);
 
         if (report(testMonitorStatusUrl, status))
             logInfo("Status report for '" + testName + "' has been sent");

@@ -4,7 +4,7 @@ public class FailureModel {
 
     public String message;
     public String type;
-    public String subtype;
+    public String data;
     public int line;
     public String details;
     public boolean isFatal;

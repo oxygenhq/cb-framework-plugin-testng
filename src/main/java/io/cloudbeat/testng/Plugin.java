@@ -182,16 +182,7 @@ public class Plugin implements ITestListener {
         result.iterationsPassed = isSuccess ? 1 : 0;
 
         if(!isSuccess && result.failure == null) {
-            FailureModel failureModel = new FailureModel("No cases found");
-
-            String failureReason = "";
-            try {
-                failureReason = new ObjectMapper().writeValueAsString(failureModel);
-            } catch (JsonProcessingException e) {
-                logError("Cannot serialize failure details");
-            }
-
-            result.failure = failureReason;
+            return;
         }
 
         suiteTimer.stop();

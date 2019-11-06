@@ -182,7 +182,16 @@ public class Plugin implements ITestListener {
         result.iterationsPassed = isSuccess ? 1 : 0;
 
         if(!isSuccess && result.failure == null) {
-            result.failure = "No cases found";
+            FailureModel failureModel = new FailureModel("No cases found");
+
+            String failureReason = "";
+            try {
+                failureReason = new ObjectMapper().writeValueAsString(failureModel);
+            } catch (JsonProcessingException e) {
+                logError("Cannot serialize failure details");
+            }
+
+            result.failure = failureReason;
         }
 
         suiteTimer.stop();
@@ -214,10 +223,7 @@ public class Plugin implements ITestListener {
         step.isSuccess = false;
         step.screenshot = takeWebDriverScreenshot();
         step.name = testName;
-        FailureModel failureModel = new FailureModel();
-        failureModel.type = "TESTNG_ERROR";
-        failureModel.message = iTestResult.getThrowable().getMessage();
-        failureModel.isFatal = true;
+        FailureModel failureModel = new FailureModel(iTestResult.getThrowable().getMessage());
 
         String failureReason = "";
         try {

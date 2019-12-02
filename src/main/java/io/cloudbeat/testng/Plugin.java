@@ -26,8 +26,8 @@ public class Plugin implements ITestListener {
     private String testMonitorStatusUrl;
     private String testMonitorToken;
     private int currentCaseIndex = 0;
-    private ResultModel.Case currentCase;
-    private ResultModel.SuiteIteration currentSuiteIteration;
+    private CaseModel currentCase;
+    private SuiteModel currentSuiteIteration;
     private final static String TEST_RESULTS_FILENAME = ".CB_TEST_RESULTS";
     private boolean isPluginDisabled;
 
@@ -48,10 +48,10 @@ public class Plugin implements ITestListener {
                 result.capabilities = payload.capabilities;
                 result.metadata = payload.metadata;
                 result.environmentVariables = payload.environmentVariables;
-                result.iterations = new ArrayList();
+                result.suites = new ArrayList();
                 result.startTime = new Date();
 
-                currentSuiteIteration = new ResultModel.SuiteIteration();
+                currentSuiteIteration = new SuiteModel();
                 currentSuiteIteration.cases = new ArrayList();
 
                 suiteTimer = Stopwatch.createStarted();
@@ -89,7 +89,7 @@ public class Plugin implements ITestListener {
 
         currentCaseIndex++;
 
-        currentCase = new ResultModel.Case();
+        currentCase = new CaseModel();
 
         PayloadModel.Case caze = payload.cases.get(testCaseName);
         if (caze != null) {
@@ -97,7 +97,6 @@ public class Plugin implements ITestListener {
         }
 
         currentCase.name = testCaseName;
-        currentCase.iterations = new ArrayList();
     }
 
     @Override
@@ -108,21 +107,17 @@ public class Plugin implements ITestListener {
 
         String testName = iTestResult.getName();
 
-        ResultModel.Step step = new ResultModel.Step();
-        step.isSuccess = true;
+        StepModel step = new StepModel();
+        step.status = ResultStatus.Passed;
         step.name = testName;
 
         testTimer.stop();
         step.duration = testTimer.elapsed().toMillis();
 
-        ResultModel.CaseIteration caseIteration = new ResultModel.CaseIteration();
-        caseIteration.iterationNum = currentCaseIndex;
-        caseIteration.isSuccess = true;
-        caseIteration.steps = new ArrayList();
-        caseIteration.steps.add(step);
-
-        currentCase.iterations.add(caseIteration);
-        currentCase.isSuccess = true;
+        currentCase.iterationNum = currentCaseIndex;
+        currentCase.status = ResultStatus.Passed;
+        currentCase.steps = new ArrayList();
+        currentCase.steps.add(step);
 
         currentSuiteIteration.cases.add(currentCase);
 
@@ -172,14 +167,10 @@ public class Plugin implements ITestListener {
                 && iTestContext.getFailedButWithinSuccessPercentageTests().size() == 0
                 && iTestContext.getPassedTests().size() > 0;
 
-        currentSuiteIteration.isSuccess = isSuccess;
-        result.iterations.add(currentSuiteIteration);
+        currentSuiteIteration.status = isSuccess ? ResultStatus.Passed : ResultStatus.Failed;
+        result.suites.add(currentSuiteIteration);
         result.endTime = new Date();
-        result.isSuccess = isSuccess;
-        result.iterationsTotal = 1;
-        result.iterationsFailed = isSuccess ? 0 : 1;
-        result.iterationsWarning = 0;
-        result.iterationsPassed = isSuccess ? 1 : 0;
+        result.status = currentSuiteIteration.status;
 
         if(!isSuccess && result.failure == null) {
             return;
@@ -210,37 +201,26 @@ public class Plugin implements ITestListener {
     private void onFailure(ITestResult iTestResult) {
         String testName = iTestResult.getName();
 
-        ResultModel.Step step = new ResultModel.Step();
-        step.isSuccess = false;
-        step.screenshot = takeWebDriverScreenshot();
+        StepModel step = new StepModel();
+        step.status = ResultStatus.Failed;
+        step.screenShot = takeWebDriverScreenshot();
         step.name = testName;
         FailureModel failureModel = new FailureModel(iTestResult.getThrowable().getMessage());
 
-        String failureReason = "";
-        try {
-            failureReason = new ObjectMapper().writeValueAsString(failureModel);
-        } catch (JsonProcessingException e) {
-            logError("Cannot serialize failure details");
-        }
-
-        step.failure = failureReason;
+        step.failure = failureModel;
         long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
         step.duration = duration;
 
-        ResultModel.CaseIteration caseIteration = new ResultModel.CaseIteration();
-        caseIteration.iterationNum = currentCaseIndex;
-        caseIteration.isSuccess = false;
-        caseIteration.steps = new ArrayList();
-        caseIteration.steps.add(step);
-        caseIteration.failure = failureReason;
+        currentCase.iterationNum = currentCaseIndex;
+        currentCase.status = ResultStatus.Failed;
+        currentCase.steps = new ArrayList();
+        currentCase.steps.add(step);
+        currentCase.failure = failureModel;
 
-        result.failure = failureReason;
-        if (currentCase.iterations != null) {
-            currentCase.iterations.add(caseIteration);
-        }
+        result.failure = failureModel;
 
         currentCase.name = testName;
-        currentCase.isSuccess = false;
+        currentCase.status = ResultStatus.Failed;
         currentSuiteIteration.cases.add(currentCase);
 
         StatusModel status = createBaseStatusModel(testName);

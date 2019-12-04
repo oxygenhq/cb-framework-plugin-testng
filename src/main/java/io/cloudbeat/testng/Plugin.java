@@ -116,8 +116,9 @@ public class Plugin implements ITestListener {
 
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Passed;
-        currentCase.steps = new ArrayList();
-        currentCase.steps.add(step);
+
+        Object stepsAttr = iTestResult.getAttribute("steps");
+        currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
 
         currentSuiteIteration.cases.add(currentCase);
 
@@ -203,7 +204,7 @@ public class Plugin implements ITestListener {
 
         StepModel step = new StepModel();
         step.status = ResultStatus.Failed;
-        step.screenShot = takeWebDriverScreenshot();
+        step.screenShot =
         step.name = testName;
         FailureModel failureModel = new FailureModel(iTestResult.getThrowable().getMessage());
 
@@ -213,8 +214,8 @@ public class Plugin implements ITestListener {
 
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Failed;
-        currentCase.steps = new ArrayList();
-        currentCase.steps.add(step);
+        Object stepsAttr = iTestResult.getAttribute("steps");
+        currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
         currentCase.failure = failureModel;
 
         result.failure = failureModel;
@@ -252,13 +253,6 @@ public class Plugin implements ITestListener {
         status.caze.progress = 1;
 
         return status;
-    }
-
-    private String takeWebDriverScreenshot() {
-        WebDriver driver = TestNGRunner.getWebDriver();
-        if (driver == null || !(driver instanceof TakesScreenshot))
-            return null;
-        return ((TakesScreenshot)driver).getScreenshotAs(OutputType.BASE64);
     }
 
     private boolean report(String endpointUrl, Object data) {

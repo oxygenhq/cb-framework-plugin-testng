@@ -15,8 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 
 public class Plugin implements ITestListener {
     private Stopwatch testTimer;
@@ -168,6 +167,17 @@ public class Plugin implements ITestListener {
                 && iTestContext.getFailedButWithinSuccessPercentageTests().size() == 0
                 && iTestContext.getPassedTests().size() > 0;
 
+        Map<String, ArrayList<StepModel>> steps = new HashMap<>();
+        AddSteps(steps, iTestContext.getPassedTests().getAllResults());
+        AddSteps(steps, iTestContext.getFailedTests().getAllResults());
+        AddSteps(steps, iTestContext.getSkippedTests().getAllResults());
+
+        for(CaseModel caseModel: currentSuiteIteration.cases) {
+            if(steps.containsKey(caseModel.name)) {
+                caseModel.steps = steps.get(caseModel.name);
+            }
+        }
+
         currentSuiteIteration.status = isSuccess ? ResultStatus.Passed : ResultStatus.Failed;
         result.suites.add(currentSuiteIteration);
         result.endTime = new Date();
@@ -196,6 +206,14 @@ public class Plugin implements ITestListener {
             writer.close();
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             logError("Failed to create " + TEST_RESULTS_FILENAME, e);
+        }
+    }
+
+    private void AddSteps(Map<String, ArrayList<StepModel>> steps, Set<ITestResult> results) {
+        for(ITestResult result: results) {
+            Object stepsAttr = result.getAttribute("steps");
+            ArrayList<StepModel> stepList = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
+            steps.put(result.getMethod().getMethodName(), stepList);
         }
     }
 

@@ -1,7 +1,7 @@
 package io.cloudbeat.testng;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.cloudbeat.junit.serializers.DateSerializer;
+import io.cloudbeat.testng.serializers.DateSerializer;
 
 import java.util.Date;
 

@@ -3,7 +3,9 @@ package io.cloudbeat.testng;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.testng.ITestResult;
 import org.testng.Reporter;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 
 import java.util.ArrayList;
@@ -61,11 +63,10 @@ public class CbTest {
     }
 
     public void endStep(String name) {
-        endStepInner(name, true);
+        endStepInner(name, Reporter.getCurrentTestResult().getName(), true);
     }
 
-    private void endStepInner(String name, boolean isSuccess) {
-        String testName = Reporter.getCurrentTestResult().getName();
+    private void endStepInner(String name, String testName, boolean isSuccess) {
         if (!_steps.containsKey(testName)) {
             return;
         }
@@ -117,17 +118,18 @@ public class CbTest {
                 .orElse(null);
     }
 
-    @AfterTest
-    protected void afterTest() {
-        if (_steps.containsKey(Reporter.getCurrentTestResult().getName()))
+    @AfterMethod
+    public void afterMethod(ITestResult result) {
+        if (_steps.containsKey(result.getMethod().getMethodName()))
         {
-            ArrayList<StepModel> steps = _steps.get(Reporter.getCurrentTestResult().getName());
-            steps = new ArrayList<>(steps.stream().filter((stepModel -> !stepModel.isFinished)).collect(Collectors.toList()));
-            for (StepModel step : steps) {
-                endStepInner(step.name, Reporter.getCurrentTestResult().isSuccess());
+            ArrayList<StepModel> steps = _steps.get(result.getMethod().getMethodName());
+            ArrayList<StepModel> notEndedSteps = new ArrayList<>(steps.stream().filter((stepModel -> !stepModel.isFinished)).collect(Collectors.toList()));
+            for (StepModel step : notEndedSteps) {
+                endStepInner(step.name, result.getMethod().getMethodName(), result.isSuccess());
             }
 
-            Reporter.getCurrentTestResult().setAttribute("steps", steps);
+            System.out.println(_steps.get(result.getMethod().getMethodName()).size());
+            result.setAttribute("steps", _steps.get(result.getMethod().getMethodName()));
         }
     }
 }

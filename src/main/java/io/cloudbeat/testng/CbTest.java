@@ -3,8 +3,13 @@ package io.cloudbeat.testng;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.ITestResult;
 import org.testng.Reporter;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterTest;
 
@@ -12,28 +17,32 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class CbTest {
     private Map<String, ArrayList<StepModel>> _steps = new HashMap<>();
-    private static WebDriver _webDriver;
-    private static Supplier<WebDriver> _webDriverGetter;
+    public WebDriver driver;
 
-    protected static void setWebDriver(WebDriver webDriver) {
-        _webDriver = webDriver;
+    public WebDriver createWebDriverBasedOnCbCapabilities() throws Exception {
+        String browserName = System.getProperty("browserName");
+        if ("chrome".equalsIgnoreCase(browserName)) {
+            String path = System.getProperty("user.dir");
+            System.setProperty("webdriver.chrome.driver", path + "\\resources\\chromedriver.exe");
+            return new ChromeDriver();
+        } else if("firefox".equalsIgnoreCase(browserName)){
+            return new FirefoxDriver();
+        } else if ("ie".equalsIgnoreCase(browserName)) {
+            return new InternetExplorerDriver();
+        }
+
+        throw new Exception("Invalid browserName: " + browserName);
     }
 
-    protected static void setWebDriverGetter(Supplier<WebDriver> webDriverGetter) {
-        _webDriverGetter = webDriverGetter;
-    }
-
-    public static WebDriver getWebDriver() {
-        if (_webDriver != null)
-            return _webDriver;
-        else if (_webDriverGetter != null)
-            return _webDriverGetter.get();
-        return null;
+    public void setWebDriver(WebDriver driver) {
+        EventFiringWebDriver eventDriver = new EventFiringWebDriver(driver);
+        CbEventHandler handler = new CbEventHandler(this);
+        eventDriver.register(handler);
+        this.driver = eventDriver;
     }
 
     public void startStep(String name) {
@@ -101,12 +110,7 @@ public class CbTest {
         currentStep.status = isSuccess ? ResultStatus.Passed : ResultStatus.Failed;
         currentStep.isFinished = true;
         currentStep.duration = (new Date().toInstant().toEpochMilli() - currentStep.startTime.toInstant().toEpochMilli());
-        if(!isSuccess) {
-            WebDriver driver = this.getWebDriver();
-            if (driver == null || !(driver instanceof TakesScreenshot)) {
-                return;
-            }
-
+        if(!isSuccess && driver != null && driver instanceof TakesScreenshot) {
             currentStep.screenShot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.BASE64);
         }
     }
@@ -131,5 +135,11 @@ public class CbTest {
             System.out.println(_steps.get(result.getMethod().getMethodName()).size());
             result.setAttribute("steps", _steps.get(result.getMethod().getMethodName()));
         }
+    }
+
+    @AfterClass(alwaysRun=true)
+    public void afterTest() {
+        driver.close();
+        driver.quit();
     }
 }

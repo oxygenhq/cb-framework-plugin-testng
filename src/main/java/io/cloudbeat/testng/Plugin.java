@@ -220,15 +220,9 @@ public class Plugin implements ITestListener {
     private void onFailure(ITestResult iTestResult) {
         String testName = iTestResult.getName();
 
-        StepModel step = new StepModel();
-        step.status = ResultStatus.Failed;
-        step.screenShot =
-        step.name = testName;
         FailureModel failureModel = new FailureModel(iTestResult.getThrowable().getMessage());
 
-        step.failure = failureModel;
         long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
-        step.duration = duration;
 
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Failed;
@@ -237,7 +231,7 @@ public class Plugin implements ITestListener {
         currentCase.failure = failureModel;
 
         result.failure = failureModel;
-
+        currentCase.duration = duration;
         currentCase.name = testName;
         currentCase.status = ResultStatus.Failed;
         currentSuiteIteration.cases.add(currentCase);

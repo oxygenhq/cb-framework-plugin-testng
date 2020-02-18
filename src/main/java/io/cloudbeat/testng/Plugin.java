@@ -184,10 +184,6 @@ public class Plugin implements ITestListener {
         result.endTime = new Date();
         result.status = currentSuiteIteration.status;
 
-        if(!isSuccess && result.failure == null) {
-            return;
-        }
-
         suiteTimer.stop();
         long duration = suiteTimer.elapsed().getSeconds();
         result.duration = duration;
@@ -231,7 +227,6 @@ public class Plugin implements ITestListener {
         currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
         currentCase.failure = failureModel;
 
-        result.failure = failureModel;
         currentCase.duration = duration;
         currentCase.name = testName;
         currentCase.status = ResultStatus.Failed;

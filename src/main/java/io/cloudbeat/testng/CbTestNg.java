@@ -1,6 +1,7 @@
 package io.cloudbeat.testng;
 
 import io.cloudbeat.common.CbTest;
+import io.cloudbeat.common.FailureModel;
 import io.cloudbeat.common.StepModel;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -29,7 +30,13 @@ public class CbTestNg extends CbTest {
 
     @AfterMethod
     public void afterMethod(ITestResult result) {
-        result.setAttribute("steps", getStepsForMethod(result.getMethod().getMethodName(), result.isSuccess()));
+        FailureModel failureModel = null;
+        Throwable throwable = result.getThrowable();
+        if(throwable != null) {
+            failureModel = new FailureModel(throwable);
+        }
+
+        result.setAttribute("steps", getStepsForMethod(result.getMethod().getMethodName(), result.isSuccess(), failureModel));
     }
 
     @AfterClass(alwaysRun=true)

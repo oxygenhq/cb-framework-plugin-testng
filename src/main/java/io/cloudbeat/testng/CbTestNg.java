@@ -1,28 +1,13 @@
 package io.cloudbeat.testng;
 
-import io.cloudbeat.common.CbTest;
-import io.cloudbeat.common.FailureModel;
-import io.cloudbeat.common.StepModel;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
+import io.cloudbeat.common.CloudBeatTest;
+import io.cloudbeat.common.model.FailureModel;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-public class CbTestNg extends CbTest {
+public class CbTestNg extends CloudBeatTest {
     @Override
     public String getCurrentTestName() {
         return Reporter.getCurrentTestResult().getName();
@@ -33,14 +18,15 @@ public class CbTestNg extends CbTest {
         FailureModel failureModel = null;
         Throwable throwable = result.getThrowable();
         if(throwable != null) {
-            failureModel = new FailureModel(throwable);
+            failureModel = new FailureModel(throwable, this.currentTestPackage);
         }
-
+        result.setAttribute("testPackageName", this.currentTestPackage);
         result.setAttribute("steps", getStepsForMethod(result.getMethod().getMethodName(), result.isSuccess(), failureModel));
     }
 
     @AfterClass(alwaysRun=true)
     public void afterClass() {
+
         afterTest();
     }
 }

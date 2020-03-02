@@ -3,10 +3,7 @@ package io.cloudbeat.testng;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Stopwatch;
-import io.cloudbeat.common.*;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
+import io.cloudbeat.common.model.*;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -100,12 +97,12 @@ public class Plugin implements ITestListener {
     }
 
     @Override
-    public void onTestSuccess(ITestResult iTestResult) {
+    public void onTestSuccess(ITestResult testResult) {
         if(isPluginDisabled) {
             return;
         }
 
-        String testName = iTestResult.getName();
+        String testName = testResult.getName();
 
         StepModel step = new StepModel();
         step.status = ResultStatus.Passed;
@@ -117,7 +114,7 @@ public class Plugin implements ITestListener {
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Passed;
 
-        Object stepsAttr = iTestResult.getAttribute("steps");
+        Object stepsAttr = testResult.getAttribute("steps");
         currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
 
         currentSuiteIteration.cases.add(currentCase);
@@ -214,16 +211,17 @@ public class Plugin implements ITestListener {
         }
     }
 
-    private void onFailure(ITestResult iTestResult) {
-        String testName = iTestResult.getName();
+    private void onFailure(ITestResult testResult) {
+        String testName = testResult.getName();
 
-        FailureModel failureModel = new FailureModel(iTestResult.getThrowable().getMessage());
+        String testPackageName = testResult.getAttribute("testPackageName").toString();
+        FailureModel failureModel = new FailureModel(testResult.getThrowable(), testPackageName);
 
-        long duration = (iTestResult.getEndMillis() - iTestResult.getStartMillis()) / 1000;
+        long duration = (testResult.getEndMillis() - testResult.getStartMillis()) / 1000;
 
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Failed;
-        Object stepsAttr = iTestResult.getAttribute("steps");
+        Object stepsAttr = testResult.getAttribute("steps");
         currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
         currentCase.failure = failureModel;
 

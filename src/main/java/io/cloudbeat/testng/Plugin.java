@@ -185,6 +185,10 @@ public class Plugin implements ITestListener {
         long duration = suiteTimer.elapsed().getSeconds();
         result.duration = duration;
 
+        if(currentSuiteIteration.cases.isEmpty()) {
+            return;
+        }
+
         ObjectMapper mapper = new ObjectMapper();
         String resultJson;
         try {

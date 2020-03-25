@@ -218,7 +218,9 @@ public class Plugin implements ITestListener {
     private void onFailure(ITestResult testResult) {
         String testName = testResult.getName();
 
-        String testPackageName = testResult.getAttribute("testPackageName").toString();
+        Object testPackageObject = testResult.getAttribute("testPackageName");
+
+        String testPackageName = testPackageObject == null ? new String() : testPackageObject.toString();
         FailureModel failureModel = new FailureModel(testResult.getThrowable(), testPackageName);
 
         long duration = (testResult.getEndMillis() - testResult.getStartMillis()) / 1000;

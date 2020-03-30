@@ -46,7 +46,9 @@ When using Selenium it might be beneficiary to be able to take browser screensho
 
 #### Providing WebDriver instance
 ```java
-import io.cloudbeat.testng.CbTestNg;import org.openqa.selenium.WebDriver;import org.openqa.selenium.remote.DesiredCapabilities;
+import io.cloudbeat.testng.CbTestNg;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 public class SeleniumTest extends CbTestNg {
     @BeforeClass
@@ -77,8 +79,12 @@ public class SeleniumTest extends CbTestNg {
 #### Custom steps
 Plugin provide possibility to start and end steps including nested steps for CloudBeat reports.
 ```java
+import org.testng.annotations.Test;
+
 public class SeleniumTest extends CbTestNg {
-    public static void Test1() {
+    
+    @Test
+    public void Test1() {
        startStep("Step");
        startStep("Inner step");
        endStep("Inner step");

@@ -43,36 +43,46 @@ public class SeleniumTest {
 ### Working with Selenium
 
 When using Selenium it might be beneficiary to be able to take browser screenshots in case of failures.
-This can be achieved in a two different ways. Please note that all 2 options are mutually exclusive.
-
-1. By providing WebDriver instance to the plugin.
-2. By providing WebDriver getter method to the plugin.
 
 #### Providing WebDriver instance
 ```java
-public class SeleniumTest extends TestNGRunner {
+import io.cloudbeat.testng.CbTestNg;import org.openqa.selenium.WebDriver;import org.openqa.selenium.remote.DesiredCapabilities;
+
+public class SeleniumTest extends CbTestNg {
     @BeforeClass
     public static void setUp() {
-        WebDriver driver = ... // WebDriver initialization
-        setWebDriver(driver);
+        DesiredCapabilities capabilities = ... // User capabilities                
+
+        // For default web browser initialization based on CloudBeat capabilities
+        setupWebDriver();
+                
+        // For default web browser initialization based on user capabilities and CloudBeat capabilities
+        initWebDriver(capabilities);
+    
+        // For default mobile driver initialization based on CloudBeat capabilities
+        setupMobDriver();
+        
+        // For default web browser initialization based on user capabilities and CloudBeat capabilities
+        initMobDriver(capabilities);
+        
+        //Or just setup your own driver
+        WebDriver driver = ... // Your driver initialization
+        setupDriver(driver); // Set up driver        
+
+        this.driver; // Created driver
     }
 }
 ```
 
-#### Providing WebDriver getter method
+#### Custom steps
+Plugin provide possibility to start and end steps including nested steps for CloudBeat reports.
 ```java
-public class SeleniumTest extends TestNGRunner {
-    @BeforeClass
-    public static void setUp() {
-       WebDriverProvider provider = new WebDriverProvider();
-       // getter should have WebDriver as its return type and shouldn't expect any arguments
-       setWebDriverGetter(provider::getWebDriver);
-    }
-}
-
-public class WebDriverProvider {
-    public WebDriver getWebDriver() {
-       return driver;
+public class SeleniumTest extends CbTestNg {
+    public static void Test1() {
+       startStep("Step");
+       startStep("Inner step");
+       endStep("Inner step");
+       endStep("Step");
     }
 }
 ```

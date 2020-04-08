@@ -22,11 +22,14 @@ public class CbTestNg extends CloudBeatTest {
         }
         result.setAttribute("testPackageName", this.currentTestPackage);
         result.setAttribute("steps", getStepsForMethod(result.getMethod().getMethodName(), result.isSuccess(), failureModel));
+        result.setAttribute("logs", getLastLogEntries());
     }
 
     @AfterClass(alwaysRun=true)
     public void afterClass() {
-
-        afterTest();
+        try {
+            afterTest();
+        }
+        catch (Exception exception){}
     }
 }

@@ -115,7 +115,21 @@ public class Plugin implements ITestListener {
         currentCase.status = ResultStatus.Passed;
 
         Object stepsAttr = testResult.getAttribute("steps");
-        currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
+        if(stepsAttr != null) {
+            currentCase.steps = (ArrayList<StepModel>) stepsAttr;
+            currentCase.har = new HashMap();
+            currentCase.steps.stream().filter(x -> x.hars != null).forEach(x -> {
+                try {
+                    System.out.println("Adding har for " + x.name);
+                    currentCase.har.put(x.name, toJson(x.hars));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        Object logsAttr = testResult.getAttribute("logs");
+        currentCase.logs = logsAttr == null ? null : (ArrayList<LogResult>) logsAttr;
 
         currentSuiteIteration.cases.add(currentCase);
 
@@ -173,6 +187,14 @@ public class Plugin implements ITestListener {
         for(CaseModel caseModel: currentSuiteIteration.cases) {
             if(steps.containsKey(caseModel.name)) {
                 caseModel.steps = steps.get(caseModel.name);
+                caseModel.har = new HashMap();
+                caseModel.steps.stream().filter(x -> x.hars != null).forEach(x -> {
+                    try {
+                        caseModel.har.put(x.name, toJson(x.hars));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
 
@@ -189,10 +211,9 @@ public class Plugin implements ITestListener {
             return;
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         String resultJson;
         try {
-            resultJson = mapper.writeValueAsString(result);
+            resultJson = toJson(result);
         } catch (JsonProcessingException e) {
             logError("Failed to serialize results.", e);
             return;
@@ -228,9 +249,26 @@ public class Plugin implements ITestListener {
         currentCase.iterationNum = currentCaseIndex;
         currentCase.status = ResultStatus.Failed;
         Object stepsAttr = testResult.getAttribute("steps");
-        currentCase.steps = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
-        currentCase.failure = failureModel;
+        if(stepsAttr != null) {
+            currentCase.steps = (ArrayList<StepModel>) stepsAttr;
+            currentCase.har = new HashMap();
+            logInfo("Processing steps");
+            currentCase.steps.stream().filter(x -> x.hars != null).forEach(x -> {
+                try {
+                    logInfo("Adding har for " + x.name);
+                    currentCase.har.put(x.name, toJson(x.hars));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        else {
+            logInfo("No steps found");
+        }
 
+        Object logsAttr = testResult.getAttribute("logs");
+        currentCase.logs = logsAttr == null ? null : (ArrayList<LogResult>) logsAttr;
+        currentCase.failure = failureModel;
         currentCase.duration = duration;
         currentCase.name = testName;
         currentCase.status = ResultStatus.Failed;
@@ -270,8 +308,7 @@ public class Plugin implements ITestListener {
     private boolean report(String endpointUrl, Object data) {
         HttpURLConnection http = null;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            String json = mapper.writeValueAsString(data);
+            String json = toJson(data);
             byte[] out = json.getBytes(StandardCharsets.UTF_8);
             int length = out.length;
 
@@ -313,6 +350,11 @@ public class Plugin implements ITestListener {
         }
 
         return true;
+    }
+
+    private String toJson(Object data) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(data);
     }
 
     private void logError(String message) {

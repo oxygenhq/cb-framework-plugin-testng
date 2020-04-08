@@ -188,14 +188,16 @@ public class Plugin implements ITestListener {
         for(CaseModel caseModel: currentSuiteIteration.cases) {
             if(steps.containsKey(caseModel.name)) {
                 caseModel.steps = steps.get(caseModel.name);
-                caseModel.har = new HashMap();
-                caseModel.steps.stream().filter(x -> x.hars != null).forEach(x -> {
-                    try {
-                        caseModel.har.put(x.name, toJson(x.hars));
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
-                    }
-                });
+                if(caseModel.steps != null && !caseModel.steps.isEmpty()) {
+                    caseModel.har = new HashMap();
+                    caseModel.steps.stream().filter(x -> x.hars != null).forEach(x -> {
+                        try {
+                            caseModel.har.put(x.name, toJson(x.hars));
+                        } catch (JsonProcessingException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
             }
 
             if(logs.containsKey(caseModel.name)) {

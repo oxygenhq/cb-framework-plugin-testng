@@ -180,9 +180,10 @@ public class Plugin implements ITestListener {
                 && iTestContext.getPassedTests().size() > 0;
 
         Map<String, ArrayList<StepModel>> steps = new HashMap<>();
-        AddSteps(steps, iTestContext.getPassedTests().getAllResults());
-        AddSteps(steps, iTestContext.getFailedTests().getAllResults());
-        AddSteps(steps, iTestContext.getSkippedTests().getAllResults());
+        Map<String, ArrayList<LogResult>> logs = new HashMap<>();
+        AddResultInfo(steps, logs, iTestContext.getPassedTests().getAllResults());
+        AddResultInfo(steps, logs, iTestContext.getFailedTests().getAllResults());
+        AddResultInfo(steps, logs, iTestContext.getSkippedTests().getAllResults());
 
         for(CaseModel caseModel: currentSuiteIteration.cases) {
             if(steps.containsKey(caseModel.name)) {
@@ -195,6 +196,10 @@ public class Plugin implements ITestListener {
                         e.printStackTrace();
                     }
                 });
+            }
+
+            if(logs.containsKey(caseModel.name)) {
+                caseModel.logs = logs.get(caseModel.name);
             }
         }
 
@@ -228,11 +233,15 @@ public class Plugin implements ITestListener {
         }
     }
 
-    private void AddSteps(Map<String, ArrayList<StepModel>> steps, Set<ITestResult> results) {
+    private void AddResultInfo(Map<String, ArrayList<StepModel>> steps, Map<String, ArrayList<LogResult>> logs, Set<ITestResult> results) {
         for(ITestResult result: results) {
             Object stepsAttr = result.getAttribute("steps");
             ArrayList<StepModel> stepList = stepsAttr == null ? null : (ArrayList<StepModel>) stepsAttr;
             steps.put(result.getMethod().getMethodName(), stepList);
+
+            Object logAttr = result.getAttribute("logs");
+            ArrayList<LogResult> logList = logAttr == null ? null : (ArrayList<LogResult>) logAttr;
+            logs.put(result.getMethod().getMethodName(), logList);
         }
     }
 

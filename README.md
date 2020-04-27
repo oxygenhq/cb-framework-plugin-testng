@@ -3,18 +3,27 @@
 ### Intro
 This plugin allows executing Java based TestNG tests using the CloudBeat platform.
 
-### Building
-`git clone https://github.com/oxygenhq/cb-framework-plugin-testng`  
-`cd cb-framework-plugin-testng`  
-`mvn install`  
 
 ### Usage
-Add the plugin to your project. If you are using a maven based project, you can directly add this library as a dependency:
+Add the plugin to your project. If you are using a maven based project, you can directly add this library as a dependency.
+
+First add the repository to your `pom.xml`:
+
 ```xml
-<dependency>  
-  <groupId>io.cloudbeat.testng</groupId>  
-  <artifactId>cb-plugin-testng</artifactId>  
-  <version>0.1.0</version>  
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+```
+
+And add the plugin dependency itself:
+```xml
+<dependency>
+    <groupId>com.github.oxygenhq</groupId>
+    <artifactId>cb-framework-plugin-testng</artifactId>
+    <version>0.10.0</version>
 </dependency>
 ```
 

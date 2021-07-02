@@ -48,10 +48,17 @@ public final class TestNGReporterHelper {
             return;
         final ITestNGMethod testMethod = testResult.getMethod();
         final String methodDisplayName = testMethod.getMethodName();
-        final String methodFqn = testMethod.getQualifiedName();
+        final String methodFqn = fixFqnWithHash(testMethod.getQualifiedName());
         final String suiteFqn = generateFqnForSuite(testResult.getTestContext().getSuite().getXmlSuite());
         reporter.startCase(methodDisplayName, methodFqn, suiteFqn);
         System.out.println("startTestMethod: " + methodDisplayName);
+    }
+
+    private static String fixFqnWithHash(final String fqn) {
+        int lastDotIndex = fqn.lastIndexOf('.');
+        String classFqn = fqn.substring(0, lastDotIndex);
+        String methodName = fqn.substring(lastDotIndex + 1, fqn.length());
+        return String.format("%s#%s", classFqn, methodName);
     }
 
     public static void endTestMethod(CbTestReporter reporter, ITestResult testResult) throws Exception {

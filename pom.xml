@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.cloudbeat.testng</groupId>
-    <artifactId>cb-plugin-testng</artifactId>
-    <version>0.10.3</version>
+    <groupId>io.cloudbeat.framework</groupId>
+    <artifactId>cb-framework-plugin-testng</artifactId>
+    <version>0.10.4</version>
     <packaging>jar</packaging>
 
     <name>CloudBeat TestNG Plugin</name>
-    <description>CloudBeat plugin for TestNG-Java</description>
+    <description>CloudBeat extension for TestNG to run and analyze test results</description>
     <url>https://github.com/oxygenhq/cb-framework-plugin-testng</url>
 
     <licenses>
@@ -45,9 +45,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.oxygenhq</groupId>
-            <artifactId>cb-framework-plugin-common</artifactId>
-            <version>0.10.3</version>
+            <groupId>io.cloudbeat</groupId>
+            <artifactId>cb-common</artifactId>
+            <version>0.11.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -75,6 +75,12 @@
             <artifactId>selenium-java</artifactId>
             <version>3.141.59</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cloudbeat</groupId>
+            <artifactId>cb-common</artifactId>
+            <version>0.11.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

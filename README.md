@@ -41,11 +41,14 @@ For running multiple chosen tests install maven surefire plugin with version equ
 ``` 
 
 Add plugin listener to your test class
+
 ```java
 
-@Listeners(io.cloudbeat.testng.Plugin.class)
+import io.cloudbeat.testng.CbTestNGListener;
+
+@Listeners(CbTestNGListener.class)
 public class SeleniumTest {
-    
+
 }
 ```
 
@@ -54,8 +57,9 @@ public class SeleniumTest {
 When using Selenium it might be beneficiary to be able to take browser screenshots in case of failures.
 
 #### Providing WebDriver instance
+
 ```java
-import io.cloudbeat.testng.CbTestNg;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
@@ -66,16 +70,16 @@ public class SeleniumTest extends CbTestNg {
 
         // For default web browser initialization based on CloudBeat capabilities
         setupWebDriver();
-                
+
         // For default web browser initialization based on user capabilities and CloudBeat capabilities
         initWebDriver(capabilities);
-    
+
         // For default mobile driver initialization based on CloudBeat capabilities
         setupMobDriver();
-        
+
         // For default web browser initialization based on user capabilities and CloudBeat capabilities
         initMobDriver(capabilities);
-        
+
         //Or just setup your own driver
         WebDriver driver = ... // Your driver initialization
         setupDriver(driver); // Set up driver        

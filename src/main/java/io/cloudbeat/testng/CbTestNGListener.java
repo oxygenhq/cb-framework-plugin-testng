@@ -87,18 +87,6 @@ public class CbTestNGListener implements
     }
 
     @Override
-    public void onStart(ISuite suite) {
-        if (ctx.isActive())
-            TestNGReporterHelper.startSuite(ctx.getReporter(), suite);
-    }
-
-    @Override
-    public void onFinish(ISuite suite) {
-        if (ctx.isActive())
-            TestNGReporterHelper.endSuite(ctx.getReporter(), suite);
-    }
-
-    @Override
     public void onExecutionStart() {
         setup();
     }
@@ -146,18 +134,39 @@ public class CbTestNGListener implements
     }
 
     @Override
-    public void onTestSuccess(ITestResult iTestResult) {
-
+    public void onTestSuccess(ITestResult testResult) {
+        if (!ctx.isActive())
+            return;
+        try {
+            TestNGReporterHelper.endTestMethod(ctx.getReporter(), testResult);
+        }
+        catch (Exception e) {
+            System.err.println("Error in onTestSuccess: " + e.toString());
+        }
     }
 
     @Override
-    public void onTestFailure(ITestResult iTestResult) {
-
+    public void onTestFailure(ITestResult testResult) {
+        if (!ctx.isActive())
+            return;
+        try {
+            TestNGReporterHelper.failTestMethod(ctx.getReporter(), testResult);
+        }
+        catch (Exception e) {
+            System.err.println("Error in onTestFailure: " + e.toString());
+        }
     }
 
     @Override
-    public void onTestSkipped(ITestResult iTestResult) {
-
+    public void onTestSkipped(ITestResult testResult) {
+        if (!ctx.isActive())
+            return;
+        try {
+            TestNGReporterHelper.skipTestMethod(ctx.getReporter(), testResult);
+        }
+        catch (Exception e) {
+            System.err.println("Error in onTestSkipped: " + e.toString());
+        }
     }
 
     @Override
@@ -166,12 +175,24 @@ public class CbTestNGListener implements
     }
 
     @Override
-    public void onStart(ITestContext iTestContext) {
+    public void onStart(ISuite suite) {
+        if (ctx.isActive())
+            TestNGReporterHelper.startSuite(ctx.getReporter(), suite);
+    }
+
+    @Override
+    public void onFinish(ISuite suite) {
+        if (ctx.isActive())
+            TestNGReporterHelper.endSuite(ctx.getReporter(), suite);
+    }
+
+    @Override
+    public void onStart(ITestContext testContext) {
 
     }
 
     @Override
-    public void onFinish(ITestContext iTestContext) {
+    public void onFinish(ITestContext testContext) {
 
     }
 

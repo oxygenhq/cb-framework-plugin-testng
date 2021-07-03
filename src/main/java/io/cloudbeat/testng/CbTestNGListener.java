@@ -126,6 +126,7 @@ public class CbTestNGListener implements
         if (!ctx.isActive())
             return;
         try {
+            ctx.setCurrentTestClass(testResult.getTestClass().getRealClass());
             TestNGReporterHelper.startTestMethod(ctx.getReporter(), testResult);
         }
         catch (Exception e) {
@@ -139,6 +140,7 @@ public class CbTestNGListener implements
             return;
         try {
             TestNGReporterHelper.endTestMethod(ctx.getReporter(), testResult);
+            ctx.setCurrentTestClass(null);
         }
         catch (Exception e) {
             System.err.println("Error in onTestSuccess: " + e.toString());
@@ -151,6 +153,7 @@ public class CbTestNGListener implements
             return;
         try {
             TestNGReporterHelper.failTestMethod(ctx.getReporter(), testResult);
+            ctx.setCurrentTestClass(null);
         }
         catch (Exception e) {
             System.err.println("Error in onTestFailure: " + e.toString());
@@ -163,6 +166,7 @@ public class CbTestNGListener implements
             return;
         try {
             TestNGReporterHelper.skipTestMethod(ctx.getReporter(), testResult);
+            ctx.setCurrentTestClass(null);
         }
         catch (Exception e) {
             System.err.println("Error in onTestSkipped: " + e.toString());

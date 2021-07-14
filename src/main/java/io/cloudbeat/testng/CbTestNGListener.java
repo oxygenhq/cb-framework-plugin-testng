@@ -8,9 +8,11 @@ import io.cloudbeat.common.Helper;
 import io.cloudbeat.common.config.CbConfig;
 import io.cloudbeat.common.model.*;
 import io.cloudbeat.common.reporter.CbTestReporter;
+import io.cloudbeat.common.reporter.wrapper.webdriver.WebDriverWrapper;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.*;
 import org.testng.internal.IResultListener2;
 
@@ -199,6 +201,21 @@ public class CbTestNGListener implements
     public void onFinish(ITestContext testContext) {
 
     }
+
+    public static EventFiringWebDriver wrapWebDriver(WebDriver webDriver) {
+        if (ctx == null || ctx.getReporter() == null)
+            return null;
+        CbTestReporter reporter = ctx.getReporter();
+        return reporter.getWebDriverWrapper().wrap(webDriver);
+    }
+
+    public static void wrapWebDriver(EventFiringWebDriver eventFiringWebDriver) {
+        if (ctx == null || ctx.getReporter() == null)
+            return;
+        CbTestReporter reporter = ctx.getReporter();
+        reporter.getWebDriverWrapper().wrap(eventFiringWebDriver);
+    }
+
 
     /* Private */
     private void setup() {

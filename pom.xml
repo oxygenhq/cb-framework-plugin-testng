@@ -45,9 +45,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.cloudbeat</groupId>
-            <artifactId>cb-common</artifactId>
-            <version>0.11.0</version>
+            <groupId>com.github.oxygenhq</groupId>
+            <artifactId>cb-framework-plugin-common</artifactId>
+            <version>0.12.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -75,12 +75,6 @@
             <artifactId>selenium-java</artifactId>
             <version>3.141.59</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.cloudbeat</groupId>
-            <artifactId>cb-common</artifactId>
-            <version>0.11.0</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

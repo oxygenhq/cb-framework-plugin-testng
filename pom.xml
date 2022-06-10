@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.cloudbeat.framework</groupId>
+    <groupId>io.cloudbeat</groupId>
     <artifactId>cb-framework-plugin-testng</artifactId>
-    <version>0.10.5</version>
+    <version>0.10.6</version>
     <packaging>jar</packaging>
 
     <name>CloudBeat TestNG Plugin</name>
@@ -45,9 +45,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.github.oxygenhq</groupId>
+            <groupId>io.cloudbeat</groupId>
             <artifactId>cb-framework-plugin-common</artifactId>
-            <version>0.12.0</version>
+            <version>0.12.5</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

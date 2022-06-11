@@ -2,27 +2,18 @@ package io.cloudbeat.testng;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Stopwatch;
 import io.cloudbeat.common.CbTestContext;
 import io.cloudbeat.common.Helper;
 import io.cloudbeat.common.config.CbConfig;
-import io.cloudbeat.common.model.*;
 import io.cloudbeat.common.reporter.CbTestReporter;
-import io.cloudbeat.common.reporter.wrapper.webdriver.WebDriverWrapper;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
 import org.testng.*;
 import org.testng.internal.IResultListener2;
-
-import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 public class CbTestNGListener implements
         IExecutionListener,
@@ -65,6 +56,20 @@ public class CbTestNGListener implements
 
     public static WebDriver createWebDriver() throws MalformedURLException {
         return createWebDriver(null);
+    }
+
+    public static WebDriver wrapWebDriver(WebDriver driver) {
+        if (ctx == null || ctx.getReporter() == null)
+            return driver;
+        CbTestReporter reporter = ctx.getReporter();
+        return reporter.getWebDriverWrapper().wrap(driver);
+    }
+
+    public static void wrapWebDriver(EventFiringWebDriver eventFiringWebDriver) {
+        if (ctx == null || ctx.getReporter() == null)
+            return;
+        CbTestReporter reporter = ctx.getReporter();
+        reporter.getWebDriverWrapper().wrap(eventFiringWebDriver);
     }
 
     public static WebDriver createWebDriver(DesiredCapabilities extraCapabilities) throws MalformedURLException {
@@ -201,21 +206,6 @@ public class CbTestNGListener implements
     public void onFinish(ITestContext testContext) {
 
     }
-
-    public static EventFiringWebDriver wrapWebDriver(WebDriver webDriver) {
-        if (ctx == null || ctx.getReporter() == null)
-            return null;
-        CbTestReporter reporter = ctx.getReporter();
-        return reporter.getWebDriverWrapper().wrap(webDriver);
-    }
-
-    public static void wrapWebDriver(EventFiringWebDriver eventFiringWebDriver) {
-        if (ctx == null || ctx.getReporter() == null)
-            return;
-        CbTestReporter reporter = ctx.getReporter();
-        reporter.getWebDriverWrapper().wrap(eventFiringWebDriver);
-    }
-
 
     /* Private */
     private void setup() {

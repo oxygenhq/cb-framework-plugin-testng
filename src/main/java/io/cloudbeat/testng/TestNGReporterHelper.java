@@ -65,7 +65,7 @@ public final class TestNGReporterHelper {
         if (!reporter.getInstance().isPresent())
             return;
         final ITestNGMethod testMethod = testResult.getMethod();
-        final String methodFqn = testMethod.getQualifiedName();
+        final String methodFqn = fixFqnWithHash(testMethod.getQualifiedName());
         if (Objects.nonNull(testResult.getThrowable()))
             reporter.endCase(methodFqn, TestStatus.FAILED, testResult.getThrowable());
         else
@@ -75,7 +75,7 @@ public final class TestNGReporterHelper {
     public static void skipTestMethod(CbTestReporter reporter, ITestResult testResult) throws Exception {
         final ITestNGMethod testMethod = testResult.getMethod();
         final String methodDisplayName = testMethod.getMethodName();
-        final String methodFqn = testMethod.getQualifiedName();
+        final String methodFqn = fixFqnWithHash(testMethod.getQualifiedName());
         final String suiteFqn = generateFqnForSuite(testResult.getTestContext().getSuite().getXmlSuite());
         reporter.startCase(methodDisplayName, methodFqn, suiteFqn);
         reporter.skipCase(methodFqn);
@@ -85,7 +85,7 @@ public final class TestNGReporterHelper {
         if (!reporter.getInstance().isPresent())
             return;
         final ITestNGMethod testMethod = testResult.getMethod();
-        final String methodFqn = testMethod.getQualifiedName();
+        final String methodFqn = fixFqnWithHash(testMethod.getQualifiedName());
         reporter.endCase(methodFqn, TestStatus.FAILED, testResult.getThrowable());
     }
 }

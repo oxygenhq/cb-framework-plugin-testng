@@ -14,6 +14,7 @@ import org.testng.*;
 import org.testng.internal.IResultListener2;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
 
 public class CbTestNGListener implements
         IExecutionListener,
@@ -64,7 +65,14 @@ public class CbTestNGListener implements
         CbTestReporter reporter = ctx.getReporter();
         return reporter.getWebDriverWrapper().wrap(driver);
     }
-
+    public static String getEnv(String name) {
+        if (ctx == null || ctx.getReporter() == null)
+            return System.getenv(name);
+        Map<String, String> cbEnvVars = ctx.getConfig().getEnvironmentVariables();
+        if (cbEnvVars != null && cbEnvVars.containsKey(name))
+            return cbEnvVars.get(name);
+        return System.getenv(name);
+    }
     public static void wrapWebDriver(EventFiringWebDriver eventFiringWebDriver) {
         if (ctx == null || ctx.getReporter() == null)
             return;

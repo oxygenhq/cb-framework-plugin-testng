@@ -56,7 +56,7 @@ public class CbTestNGListener implements
     }
 
     public static WebDriver createWebDriver() throws MalformedURLException {
-        return createWebDriver(null);
+        return createWebDriver(null, false);
     }
 
     public static WebDriver wrapWebDriver(WebDriver driver) {
@@ -80,7 +80,10 @@ public class CbTestNGListener implements
         reporter.getWebDriverWrapper().wrap(eventFiringWebDriver);
     }
 
-    public static WebDriver createWebDriver(DesiredCapabilities extraCapabilities) throws MalformedURLException {
+    public static WebDriver createWebDriver(boolean doNotWrap) throws MalformedURLException {
+        return createWebDriver(null, doNotWrap);
+    }
+    public static WebDriver createWebDriver(DesiredCapabilities extraCapabilities, boolean doNotWrap) throws MalformedURLException {
         if (ctx == null || ctx.getReporter() == null) {
             // if user called createWebDriver method outside CloudBeat context and provided capabilities
             // then try to initialize a regular WebDriver with default webdriver URL
@@ -91,8 +94,10 @@ public class CbTestNGListener implements
         CbTestReporter reporter = ctx.getReporter();
         DesiredCapabilities capabilities = Helper.mergeUserAndCloudbeatCapabilities(extraCapabilities);
         io.cloudbeat.common.config.CbConfig config = CbTestContext.getInstance().getConfig();
-        final String webdriverUrl = config != null && config.getSeleniumUrl() != null ? config.getSeleniumUrl() : CbConfig.DEFAULT_WEBDRIVER_URL;
-        RemoteWebDriver driver = new RemoteWebDriver(new URL(webdriverUrl), capabilities);
+        final String webDriverUrl = config != null && config.getSeleniumUrl() != null ? config.getSeleniumUrl() : CbConfig.DEFAULT_WEBDRIVER_URL;
+        RemoteWebDriver driver = new RemoteWebDriver(new URL(webDriverUrl), capabilities);
+        if (doNotWrap)
+            return driver;
         return reporter.getWebDriverWrapper().wrap(driver);
     }
 
@@ -228,7 +233,6 @@ public class CbTestNGListener implements
         if (!ctx.isActive() || !started)
             return;
         started = false;
-        System.out.println("close - thread: " + Thread.currentThread().getName());
         TestNGReporterHelper.endInstance(ctx.getReporter());
     }
 }

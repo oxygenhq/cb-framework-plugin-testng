@@ -27,7 +27,6 @@ public final class TestNGReporterHelper {
         final String displayName = suite.getName();
         final String fqn = generateFqnForSuite(suite.getXmlSuite());
         reporter.startSuite(displayName, fqn);
-        System.out.println("startSuite: " + displayName);
     }
 
     private static String generateFqnForSuite(XmlSuite suite) {
@@ -40,7 +39,6 @@ public final class TestNGReporterHelper {
 
     public static void endSuite(CbTestReporter reporter, ISuite suite) {
         reporter.endLastSuite();
-        System.out.println("endSuite: " + suite.getName());
     }
 
     public static void startTestMethod(CbTestReporter reporter, ITestResult testResult) throws Exception {
@@ -51,7 +49,6 @@ public final class TestNGReporterHelper {
         final String methodFqn = fixFqnWithHash(testMethod.getQualifiedName());
         final String suiteFqn = generateFqnForSuite(testResult.getTestContext().getSuite().getXmlSuite());
         reporter.startCase(methodDisplayName, methodFqn, suiteFqn);
-        System.out.println("startTestMethod: " + methodDisplayName);
     }
 
     private static String fixFqnWithHash(final String fqn) {

@@ -93,12 +93,17 @@ public class CbTestNGListener implements
         }
         CbTestReporter reporter = ctx.getReporter();
         DesiredCapabilities capabilities = Helper.mergeUserAndCloudbeatCapabilities(extraCapabilities);
-        io.cloudbeat.common.config.CbConfig config = CbTestContext.getInstance().getConfig();
-        final String webDriverUrl = config != null && config.getSeleniumUrl() != null ? config.getSeleniumUrl() : CbConfig.DEFAULT_WEBDRIVER_URL;
-        RemoteWebDriver driver = new RemoteWebDriver(new URL(webDriverUrl), capabilities);
+        RemoteWebDriver driver = new RemoteWebDriver(new URL(getWebDriverUrl()), capabilities);
         if (doNotWrap)
             return driver;
         return reporter.getWebDriverWrapper().wrap(driver);
+    }
+
+    public static String getWebDriverUrl() {
+        CbConfig config = CbTestContext.getInstance().getConfig();
+        if (config != null)
+            return config.getSeleniumOrAppiumUrl();
+        return CbConfig.DEFAULT_WEBDRIVER_URL;
     }
 
     private String toJson(Object data) throws JsonProcessingException {

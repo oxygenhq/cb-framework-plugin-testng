@@ -101,8 +101,12 @@ public class CbTestNGListener implements
 
     public static String getWebDriverUrl() {
         CbConfig config = CbTestContext.getInstance().getConfig();
-        if (config != null)
-            return config.getSeleniumOrAppiumUrl();
+
+        if (config != null) {
+            String remoteUrl =  config.getSeleniumOrAppiumUrl();
+            return remoteUrl != null ? remoteUrl : CbConfig.DEFAULT_WEBDRIVER_URL;
+        }
+
         return CbConfig.DEFAULT_WEBDRIVER_URL;
     }
 

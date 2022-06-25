@@ -6,6 +6,7 @@ import io.cloudbeat.common.CbTestContext;
 import io.cloudbeat.common.Helper;
 import io.cloudbeat.common.config.CbConfig;
 import io.cloudbeat.common.reporter.CbTestReporter;
+import io.cloudbeat.common.reporter.model.StepResult;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -45,7 +46,8 @@ public class CbTestNGListener implements
         CbTestReporter reporter = getReporter();
         if (reporter == null)
             return null;
-        return reporter.startStep(name);
+        final StepResult step = reporter.startStep(name);
+        return step != null ? step.getId() : null;
     }
 
     public static void endLastStep() {

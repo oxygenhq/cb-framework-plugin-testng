@@ -6,7 +6,7 @@
 
     <groupId>io.cloudbeat</groupId>
     <artifactId>cb-framework-plugin-testng</artifactId>
-    <version>0.10.12</version>
+    <version>0.10.13</version>
     <packaging>jar</packaging>
 
     <name>CloudBeat TestNG Plugin</name>
